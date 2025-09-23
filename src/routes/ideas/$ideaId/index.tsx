@@ -1,18 +1,13 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
-import { type Idea } from '@/types';
-import { api } from '@/lib/axios';
-
-const fetchidea = async (ideaID: string): Promise<Idea> => {
-    const res = await api(`/ideas/${ideaID}`);
-    return res.data
-};
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query';
+import { fetchIdea } from '@/api/ideas';
+import { deleteIdea } from '@/api/ideas';
 
 
 const ideaQueryOptions = (ideaId: string) => {
     return queryOptions({
         queryKey: ['idea', ideaId],
-        queryFn: () => fetchidea(ideaId)
+        queryFn: () => fetchIdea(ideaId)
     })
 }
 export const Route = createFileRoute('/ideas/$ideaId/')({
@@ -22,7 +17,22 @@ export const Route = createFileRoute('/ideas/$ideaId/')({
 
 function IdeaDetails() {
     const { ideaId } = Route.useParams()
-    const { data: idea } = useSuspenseQuery(ideaQueryOptions(ideaId))
+    const { data: idea } = useSuspenseQuery(ideaQueryOptions(ideaId));
+
+    const navigate = useNavigate();
+
+    const { mutateAsync: deleteMutate, isPending } = useMutation({
+        mutationFn: () => deleteIdea(ideaId),
+        onSuccess: () => {
+            navigate({ to: '/ideas' })
+        }
+    })
+
+    const handleDlete = async () => {
+        if (window.confirm('Are you sure !!!')) {
+            await deleteMutate()
+        }
+    }
 
     return <div className='p-4'>
         <Link to="/ideas" className='text-blue-500 underline block mb-4'>
@@ -30,5 +40,9 @@ function IdeaDetails() {
         </Link>
         <h2 className='text-2xl font-bold'>{idea.title}</h2>
         <p className='mt-2'>{idea.description}</p>
+        <Link to="/ideas/$ideaId/edit" params={{ ideaId: idea.id.toString() }} className='inline-block text-sm bg-yellow-500 hover:bg-yellow-600 text-white mt-4 mr-2 px-4 py-2 rounded transition'>Edit</Link>
+        <button onClick={handleDlete} disabled={isPending} className='disabled:opacity-50 hover:bg-red-700 text-sm bg-red-600 text-white mt-4 px-4 py-2 rounded transition'>
+            {isPending ? 'Deleting,,,,' : 'Delete'}
+        </button>
     </div>
 }
