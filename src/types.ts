@@ -1,5 +1,5 @@
 export type Idea = {
-    id: string,
+    _id: string,
     title: string,
     summary: string,
     description: string,
@@ -7,3 +7,9 @@ export type Idea = {
     createdAt: string,
 
 }
+
+export interface Password {
+    name: string
+    email: string
+    password: string
+} 

@@ -5,9 +5,10 @@ import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import IdeaCard from '@/components/IdeadCard';
 
 
+
 const iseasQueryOptions = queryOptions({
-  queryKey: ['ideas'],
-  queryFn: fetchIdeas
+  queryKey: ['ideas', { limit: 3 }],
+  queryFn: () => fetchIdeas(3)
 })
 
 export const Route = createFileRoute('/')({
@@ -31,7 +32,7 @@ function HomePage() {
       <h2 className="text-2xl font-semibold mb-4 text-gray-800">Latest Ideas</h2>
 
       <div className="space-y-6">
-        {latestIdes.map(idea => <IdeaCard key={idea.id} idea={idea} button={false} />)}
+        {latestIdes.map(idea => <IdeaCard key={idea._id} idea={idea} button={false} />)}
       </div>
       <div className="mt-6">
         <Link
